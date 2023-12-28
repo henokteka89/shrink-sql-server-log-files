@@ -1,0 +1,23 @@
+---check log space used or log space size
+dbcc sqlperf(logspace)
+
+--check why log space wasn't reused (reason: nothing, active transaction, log backup, active backups or restore, availability replica, checkpoint, oldest page)
+select name, log_use_wait{desc from sys.databases
+
+--Remeber
+*/
+- In active_transaction, you might not be able to shrink and you might need to wait until the transaction is completed. However, after a transaction is completed you won't see the log file truncated immediately. 
+- The best reason is "NOTHING"
+- After shrink operation, take backup until it shows NOTHING (if full recovery)
+/*
+
+--To shrink
+on the database go to TASK (right-click the database) - SHRINK- FILES - choose LOG/NOT DATA/ - 
+-- You will see the "Current allocated space" and "Available Free Space"
+--- You can choose the second "SHRINK ACTION" - "reorganize pages before releasing unused space. e.g. shrink to "1024"MB
+ --GUI
+Use Databasename
+GO
+DBCC shrinkfile (N'logicalname of log file', intended SIZE) --e.g. DBCC shrinkfile (N'sales_log', 1024)
+GO
+
